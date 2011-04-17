@@ -18,6 +18,17 @@ CARD_VALUE_HASH = {
 
 CARD_NUM_HASH = CARD_VALUE_HASH.invert
 
+HAND_CMP_METHODS = [
+	:straight_flush,
+	:four_of_a_kind,
+	:full_house,
+	:flush,
+	:straight,
+	:three_of_a_kind,
+	:pairs,
+	:high_cards,
+]
+
 class Card
 	include Comparable
 	attr_reader :number, :suite
@@ -88,6 +99,29 @@ class Hand
 		@cards.map{|c| c.to_s}.join(" ")
 	end
 
+	def straight_flush ()
+		straight = self.straight
+		flush = self.flush
+		if not straight.empty? and not flush.empty?
+			straight
+		else
+			[]
+		end
+	end
+
+	def four_of_a_kind ()
+		n_of_a_kind 4
+	end
+
+	def full_house ()
+		triples_and_pairs = n_of_a_kind(3) + n_of_a_kind(2)
+		if triples_and_pairs.length == 2
+			triples_and_pairs
+		else
+			[]
+		end
+	end
+
 	def straight ()
 		last_card = @cards[0]
 		@cards[1..-1].each do |card|
@@ -104,28 +138,45 @@ class Hand
 		[]
 	end
 
-	def n_of_a_kind (n)
-		n_tuple_values
-		@numbers.each do |k, v|
-			n_tuple_values << v[0] if v.length >= n
-		end
-		n_tuple_values.sort.reverse
-	end
-
-	def four_of_a_kind ()
-		n_of_a_kind 4
-	end
-
 	def three_of_a_kind ()
 		n_of_a_kind(3) + n_of_a_kind(2)
 	end
 
-	def two_of_a_kind ()
+	def pairs ()
 		n_of_a_kind 2
 	end
 
 	def high_cards ()
 		@cards.reverse
+	end
+
+	def n_of_a_kind (n)
+		n_tuple_values = []
+		@numbers.each do |k, v|
+			n_tuple_values << v[0] if v.length == n
+		end
+		n_tuple_values.sort.reverse
+	end
+
+	def cards_cmp (a, b)
+		i = 0
+		loop do
+			return 0 if not a[i] and not b[i]
+			return -1 if not a[i]
+			return 1 if not b[i]
+			return a[i] <=> b[i] unless a[i] == b[i]
+			i += 1
+		end
+	end
+
+	def <=> (other)
+		HAND_CMP_METHODS.each do |m_name|
+			a, b = self.method(m_name), other.method(m_name)
+			if not a.call.empty? or not b.call.empty?
+				p m_name
+				return cards_cmp(a.call, b.call)
+			end
+		end
 	end
 end
 
@@ -139,14 +190,15 @@ def cards_to_s (cards)
 	cards.map{|c| c.to_s}.join(" ") if cards
 end
 
+responses = {
+	:"-1" => "White wins",
+	:"0" => "Tie",
+	:"1" => "Black wins",
+}
+
 while l = ARGF.gets
 	cards = l.split(" ")
 	black_hand = hand_from_array(cards[0, 5])
 	white_hand = hand_from_array(cards[5, 5])
-	puts black_hand.to_s
-	puts cards_to_s black_hand.straight
-	puts cards_to_s black_hand.flush
-	puts white_hand.to_s
-	puts cards_to_s white_hand.straight
-	puts cards_to_s white_hand.flush
+	puts responses[:"#{black_hand <=> white_hand}"]
 end
