@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <map>
 #include "poker.h"
 
 using namespace std;
@@ -23,14 +24,22 @@ Round getRound () {
 }
 
 void check (Hand const & hand) {
+	Card lastCard;
 	Hand::const_iterator it;
+	bool straight = true;
 	for (it = hand.begin(); it != hand.end(); it++) {
-		cout << *it << endl;
+		if (it != hand.begin() && straight) {
+			straight = (lastCard.succ() == *it);
+		}
+		lastCard = *it;
+	}
+	if (straight) {
+		cout << "Straight\n";
 	}
 }
 
 int main () {
-	list< Round > rounds;
+	list<Round> rounds;
 	while (true) {
 		Round round = getRound();
 		if (cin.good()) {			
