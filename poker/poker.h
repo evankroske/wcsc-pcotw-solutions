@@ -3,6 +3,9 @@
 #include <list>
 #include <map>
 
+enum {NoHand, OnePair, TwoPair, ThreeTuple, Straight, Flush, FullHouse, FourOfAKind, StraightFlush} 
+	HandValue;
+
 class Card {
 public:
 	char num, suit;

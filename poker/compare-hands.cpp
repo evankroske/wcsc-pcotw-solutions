@@ -24,35 +24,47 @@ Round getRound () {
 }
 
 void check (Hand const & hand) {
-	bool straight = true;
 	Card lastCard;
+	map<char,list<Card> > suitsToCards;
+	map<char,list<Card> > numsToCards;
 
-	bool flush;
-	map<char,int> suits;
-
+	bool straight = true;
 	Hand::const_iterator it;
 	for (it = hand.begin(); it != hand.end(); it++) {
 		Card card = *it;
 
 		if (it != hand.begin() && straight) {
-			straight = (lastCard.succ() == card);
+			try {
+				straight = (lastCard.succ() == card);
+			} catch (char const * msg) {
+				straight = false;
+			}
 		}
-
-		if (suits.find(card.suit) != suits.end()) {
-			suits[card.suit]++;
-		} else {
-			suits[card.suit] = 1;
-		}
+		suitsToCards[card.suit].push_back(card);
+		numsToCards[card.num].push_back(card);
 		lastCard = *it;
 	}
 
-	flush = (suits.size() == 1);
+	bool flush = (suitsToCards.size() == 1);
+
+	list<Card> fourTuples;
+	map<char,list<Card> >::iterator numAndCards;
+	for (numAndCards = numsToCards.begin(); numAndCards != numsToCards.end(); numAndCards++) {
+		char num = numAndCards->first;
+		list<Card> cards = numAndCards->second;
+		if (cards.size() == 4) {
+			fourTuples.push_back(cards.front());
+		}
+	}
 
 	if (straight) {
 		cout << "Straight\n";
 	}
 	if (flush) {
 		cout << "Flush\n";
+	}
+	if (!fourTuples.empty()) {
+		cout << "Four of a kind\n";
 	}
 }
 
