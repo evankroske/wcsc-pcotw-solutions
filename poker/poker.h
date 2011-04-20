@@ -5,6 +5,8 @@
 
 class Card {
 public:
+	char num, suit;
+
 	Card ();
 	Card (char num, char suit);
 	bool operator< (Card const & other);
@@ -12,7 +14,6 @@ public:
 	bool operator== (Card const & other);
 private:
 	static const std::string VALUE;
-	char num, suit;
 
 	int val () const;
 	friend std::ostream & operator<< (std::ostream & out, Card const & card);

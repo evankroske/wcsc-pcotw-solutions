@@ -24,17 +24,35 @@ Round getRound () {
 }
 
 void check (Hand const & hand) {
-	Card lastCard;
-	Hand::const_iterator it;
 	bool straight = true;
+	Card lastCard;
+
+	bool flush;
+	map<char,int> suits;
+
+	Hand::const_iterator it;
 	for (it = hand.begin(); it != hand.end(); it++) {
+		Card card = *it;
+
 		if (it != hand.begin() && straight) {
-			straight = (lastCard.succ() == *it);
+			straight = (lastCard.succ() == card);
+		}
+
+		if (suits.find(card.suit) != suits.end()) {
+			suits[card.suit]++;
+		} else {
+			suits[card.suit] = 1;
 		}
 		lastCard = *it;
 	}
+
+	flush = (suits.size() == 1);
+
 	if (straight) {
 		cout << "Straight\n";
+	}
+	if (flush) {
+		cout << "Flush\n";
 	}
 }
 
