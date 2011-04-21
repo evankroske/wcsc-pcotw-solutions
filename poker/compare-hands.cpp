@@ -11,9 +11,8 @@ Hand getHand () {
 		string cardString;
 		cin >> cardString;
 		Card card(cardString[0], cardString[1]);
-		hand.push_back(card);
+		hand.add(card);
 	}
-	hand.sort();
 	return hand;
 }
 
@@ -24,26 +23,10 @@ Round getRound () {
 }
 
 void check (Hand const & hand) {
-	Card lastCard;
-	map<char,list<Card> > suitsToCards;
-	map<char,list<Card> > numsToCards;
+	/*
 
 	bool straight = true;
 	Hand::const_iterator it;
-	for (it = hand.begin(); it != hand.end(); it++) {
-		Card card = *it;
-
-		if (it != hand.begin() && straight) {
-			try {
-				straight = (lastCard.succ() == card);
-			} catch (char const * msg) {
-				straight = false;
-			}
-		}
-		suitsToCards[card.suit].push_back(card);
-		numsToCards[card.num].push_back(card);
-		lastCard = *it;
-	}
 
 	bool flush = (suitsToCards.size() == 1);
 
@@ -66,6 +49,7 @@ void check (Hand const & hand) {
 	if (!fourTuples.empty()) {
 		cout << "Four of a kind\n";
 	}
+	*/
 }
 
 int main () {
@@ -81,11 +65,14 @@ int main () {
 
 	list< Round >::iterator it;
 	for (it = rounds.begin(); it != rounds.end(); it++) {
-		Round round = *it;
-		cout << "Black's hand: " << endl;
-		check(round.first);
-		cout << "White's hand: " << endl;
-		check(round.second);
+		Hand b = it->first;
+		Hand w = it->second;
+		cout << "Black's hand: " << b << endl;
+		cout << "Straight: " << b.straight() << endl;
+		cout << "Flush: " << b.flush() << endl;
+		cout << "White's hand: " << w << endl;
+		cout << "Straight: " << w.straight() << endl;
+		cout << "Flush: " << w.flush() << endl;
 	}
 	return 0;
 }

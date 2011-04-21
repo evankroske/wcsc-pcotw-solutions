@@ -3,8 +3,11 @@
 #include <list>
 #include <map>
 
-enum {NoHand, OnePair, TwoPair, ThreeTuple, Straight, Flush, FullHouse, FourOfAKind, StraightFlush} 
-	HandValue;
+using std::ostream;
+using std::list;
+using std::map;
+using std::pair;
+using std::string;
 
 class Card {
 public:
@@ -16,11 +19,29 @@ public:
 	Card succ ();
 	bool operator== (Card const & other);
 private:
-	static const std::string VALUE;
+	static const string VALUE;
 
 	int val () const;
-	friend std::ostream & operator<< (std::ostream & out, Card const & card);
+	friend ostream & operator<< (ostream & out, Card const & card);
 };
 
-typedef std::list<Card> Hand;
-typedef std::pair<Hand,Hand> Round;
+typedef list<Card> Cards;
+ostream & operator<< (ostream & out, Cards const & cards);
+
+class Hand {
+public:
+	enum Value {NoHand, OnePair, TwoPair, ThreeOfAKind, Straight, Flush, FullHouse, FourOfAKind, StraightFlush};
+
+	Hand ();
+	void add(Card const & card);
+	Cards straight () const;
+	Cards flush () const;
+private:
+	Cards cards;
+	map<char,Cards> suitsToCards;
+	map<char,Cards> numsToCards;
+
+	friend ostream & operator<< (ostream & out, Hand const & hand);
+};
+
+typedef pair<Hand,Hand> Round;

@@ -34,17 +34,70 @@ std::ostream & operator<< (std::ostream & out, Card const & card) {
 	return out;
 }
 
-std::ostream & operator<< (std::ostream & out, Hand const & hand) {
-	Hand::const_iterator it = hand.begin();
-	while (true) {
+std::ostream & operator<< (std::ostream & out, Cards const & cards) {
+	Cards::const_iterator it = cards.begin();
+	while (it != cards.end()) {
 		Card card = *it;
 		it++;
-		if (it != hand.end()) {
+		if (it != cards.end()) {
 			out << card << " ";
 		} else {
 			out << card;
 			break;
 		}
 	}
+	return out;
+}
+
+Hand::Hand ():
+	cards(),
+	suitsToCards(),
+	numsToCards() {}
+
+void Hand::add (Card const & card) {
+	cards.push_back(card);
+	cards.sort();
+	numsToCards[card.num].push_back(card);
+	suitsToCards[card.suit].push_back(card);
+}
+
+Cards Hand::straight () const {
+	bool isStraight = true;
+	Card lastCard;
+	Cards::const_iterator it;
+	for (it = cards.begin(); isStraight && it != cards.end(); it++) {
+		Card card = *it;
+		if (it != cards.begin()) {
+			try {
+				isStraight = (lastCard.succ() == card);
+			} catch (char const * msg) {
+				isStraight = false;
+			}
+		}
+		lastCard = *it;
+	}
+	Cards deciders;
+	if (isStraight) {
+		deciders.push_back(lastCard);
+	}
+	return deciders;
+}
+
+Cards Hand::flush () const {
+	map<char,Cards>::const_iterator it;
+	for (it = suitsToCards.begin(); it != suitsToCards.end(); it++) {
+		Cards cardsWithThisSuit = it->second;
+		if (cardsWithThisSuit.size() == 5) {
+			Cards deciders = cards;
+			deciders.reverse();
+			return deciders;
+		}
+	}
+	return Cards();
+}
+
+std::ostream & operator<< (std::ostream & out, Hand const & hand) {
+	std::list<Card> const & cards = hand.cards;
+	out << cards;
 	return out;
 }
