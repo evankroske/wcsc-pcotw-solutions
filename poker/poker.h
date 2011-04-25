@@ -15,9 +15,10 @@ public:
 
 	Card ();
 	Card (char num, char suit);
-	bool operator< (Card const & other);
 	Card succ ();
+	bool operator< (Card const & other);
 	bool operator== (Card const & other);
+	bool operator> (Card const & other);
 private:
 	static const string VALUE;
 
@@ -30,16 +31,23 @@ ostream & operator<< (ostream & out, Cards const & cards);
 
 class Hand {
 public:
-	enum Value {NoHand, OnePair, TwoPair, ThreeOfAKind, Straight, Flush, FullHouse, FourOfAKind, StraightFlush};
+	enum Rank {NoHand, OnePair, TwoPair, ThreeOfAKind, Straight, Flush, FullHouse, FourOfAKind, StraightFlush};
+	static const map<Rank,string> typeName;
 
-	Hand ();
-	void add(Card const & card);
-	Cards straight () const;
-	Cards flush () const;
+	static map<Rank,string> createMap ();
+
+	Hand (Cards cards_);
+	bool operator< (Hand const & other) const;
 private:
 	Cards cards;
+	Cards deciders;
 	map<char,Cards> suitsToCards;
 	map<char,Cards> numsToCards;
+	bool straight;
+	Rank rank;
+
+	bool straightFlush () const;
+	bool flush () const;
 
 	friend ostream & operator<< (ostream & out, Hand const & hand);
 };

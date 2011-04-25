@@ -6,14 +6,14 @@
 using namespace std;
 
 Hand getHand () {
-	Hand hand;
+	Cards cards;
 	for (int i = 0; i < 5; i++) {
 		string cardString;
 		cin >> cardString;
 		Card card(cardString[0], cardString[1]);
-		hand.add(card);
+		cards.push_back(card);
 	}
-	return hand;
+	return Hand(cards);
 }
 
 Round getRound () {
@@ -68,11 +68,13 @@ int main () {
 		Hand b = it->first;
 		Hand w = it->second;
 		cout << "Black's hand: " << b << endl;
+		cout << "White's hand: " << w << endl;
+		/*
 		cout << "Straight: " << b.straight() << endl;
 		cout << "Flush: " << b.flush() << endl;
-		cout << "White's hand: " << w << endl;
 		cout << "Straight: " << w.straight() << endl;
 		cout << "Flush: " << w.flush() << endl;
+		*/
 	}
 	return 0;
 }

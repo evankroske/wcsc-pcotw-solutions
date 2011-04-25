@@ -10,10 +10,6 @@ Card::Card (char num, char suit):
 	num(num),
 	suit(suit) {}
 
-bool Card::operator< (Card const & other) {
-	return val() < other.val();
-}
-
 Card Card::succ () {
 	if (num == 'A') {
 		throw "No successor";
@@ -21,8 +17,16 @@ Card Card::succ () {
 	return Card(VALUE[val()+1], suit);
 }
 
+bool Card::operator< (Card const & other) {
+	return val() < other.val();
+}
+
 bool Card::operator== (Card const & other) {
 	return num == other.num;
+}
+
+bool Card::operator> (Card const & other) {
+	return val() > other.val();
 }
 
 int Card::val () const {
@@ -49,51 +53,99 @@ std::ostream & operator<< (std::ostream & out, Cards const & cards) {
 	return out;
 }
 
-Hand::Hand ():
-	cards(),
+const map<Hand::Rank,string> Hand::typeName = Hand::createMap();
+
+Hand::Hand (Cards cards_):
+	cards(cards_),
+	deciders(),
 	suitsToCards(),
-	numsToCards() {}
-
-void Hand::add (Card const & card) {
-	cards.push_back(card);
+	numsToCards(),
+	straight(true) {
 	cards.sort();
-	numsToCards[card.num].push_back(card);
-	suitsToCards[card.suit].push_back(card);
-}
 
-Cards Hand::straight () const {
-	bool isStraight = true;
+	Cards::iterator it;
 	Card lastCard;
-	Cards::const_iterator it;
-	for (it = cards.begin(); isStraight && it != cards.end(); it++) {
+	for (it = cards.begin(); it != cards.end(); it++) {
 		Card card = *it;
-		if (it != cards.begin()) {
+		numsToCards[card.num].push_back(card);
+		suitsToCards[card.suit].push_back(card);
+
+		if (straight && it != cards.begin()) {
 			try {
-				isStraight = (lastCard.succ() == card);
+				straight = (lastCard.succ() == card);
 			} catch (char const * msg) {
-				isStraight = false;
+				straight = false;
 			}
 		}
 		lastCard = *it;
 	}
-	Cards deciders;
-	if (isStraight) {
-		deciders.push_back(lastCard);
+
+	if (straightFlush()) {
+		rank = StraightFlush;
+		deciders.push_back(cards.back());
+	} else if (flush()) {
+		rank = Flush;
+		deciders = cards;
+		deciders.reverse();
+	} else if (straight) {
+		rank = Straight;
+		deciders.push_back(cards.back());
 	}
-	return deciders;
 }
 
-Cards Hand::flush () const {
+bool Hand::operator< (Hand const & other) const {
+	if (rank < other.rank) {
+		return true;
+	} else if (rank > other.rank) {
+		return false;
+	} else {
+		Cards::const_iterator a;
+		Cards::const_iterator b;
+		for (a = cards.begin(), b = other.cards.begin();
+			a != cards.end(), b != other.cards.end();
+			a++, b++) {
+			Card cardA = *a;
+			Card cardB = *b;
+			if (cardA < cardB) {
+				return true;
+			} else if (cardA > cardB) {
+				return false;
+			}
+		}
+		if (b != other.cards.end()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+bool Hand::straightFlush () const {
+	return straight && flush();
+}
+
+bool Hand::flush () const {
 	map<char,Cards>::const_iterator it;
 	for (it = suitsToCards.begin(); it != suitsToCards.end(); it++) {
 		Cards cardsWithThisSuit = it->second;
 		if (cardsWithThisSuit.size() == 5) {
-			Cards deciders = cards;
-			deciders.reverse();
-			return deciders;
+			return true;
 		}
 	}
-	return Cards();
+	return false;
+}
+
+map<Hand::Rank,string> Hand::createMap () {
+	map<Hand::Rank,string> valueMap;
+	valueMap[Hand::StraightFlush] = "Straight flush";
+	valueMap[Hand::FourOfAKind] = "Four of a kind";
+	valueMap[Hand::FullHouse] = "Full house";
+	valueMap[Hand::Flush] = "Flush";
+	valueMap[Hand::Straight] = "Straight";
+	valueMap[Hand::ThreeOfAKind] = "Three of a kind";
+	valueMap[Hand::TwoPair] = "Two pairs";
+	valueMap[Hand::OnePair] = "One pair";
+	valueMap[Hand::NoHand] = "No hand";
 }
 
 std::ostream & operator<< (std::ostream & out, Hand const & hand) {
