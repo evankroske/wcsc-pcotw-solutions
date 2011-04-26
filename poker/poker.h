@@ -16,6 +16,7 @@ public:
 	Card ();
 	Card (char num, char suit);
 	Card succ ();
+	int cmp(Card const & other) const;
 	bool operator< (Card const & other);
 	bool operator== (Card const & other);
 	bool operator> (Card const & other);
@@ -32,12 +33,12 @@ ostream & operator<< (ostream & out, Cards const & cards);
 class Hand {
 public:
 	enum Rank {NoHand, OnePair, TwoPair, ThreeOfAKind, Straight, Flush, FullHouse, FourOfAKind, StraightFlush};
-	static const map<Rank,string> typeName;
-
-	static map<Rank,string> createMap ();
 
 	Hand (Cards cards_);
+	int cmp (Hand const & other) const;
 	bool operator< (Hand const & other) const;
+	bool operator> (Hand const & other) const;
+	bool operator== (Hand const & other) const;
 private:
 	Cards cards;
 	Cards deciders;
@@ -45,9 +46,11 @@ private:
 	map<char,Cards> numsToCards;
 	bool straight;
 	Rank rank;
+	static const map<Rank,string> rankToString;
 
 	bool straightFlush () const;
 	bool flush () const;
+	static map<Rank,string> createMap ();
 
 	friend ostream & operator<< (ostream & out, Hand const & hand);
 };

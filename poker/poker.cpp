@@ -17,16 +17,27 @@ Card Card::succ () {
 	return Card(VALUE[val()+1], suit);
 }
 
+int Card::cmp (Card const & other) const {
+	int a = val(), b = other.val();
+	if (a < b) {
+		return -1;
+	} else if (a > b) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 bool Card::operator< (Card const & other) {
-	return val() < other.val();
+	return cmp(other) < 0;
 }
 
 bool Card::operator== (Card const & other) {
-	return num == other.num;
+	return cmp(other) == 0;
 }
 
 bool Card::operator> (Card const & other) {
-	return val() > other.val();
+	return cmp(other) > 0;
 }
 
 int Card::val () const {
@@ -53,7 +64,7 @@ std::ostream & operator<< (std::ostream & out, Cards const & cards) {
 	return out;
 }
 
-const map<Hand::Rank,string> Hand::typeName = Hand::createMap();
+const map<Hand::Rank,string> Hand::rankToString = Hand::createMap();
 
 Hand::Hand (Cards cards_):
 	cards(cards_),
@@ -93,31 +104,44 @@ Hand::Hand (Cards cards_):
 	}
 }
 
-bool Hand::operator< (Hand const & other) const {
+int Hand::cmp (Hand const & other) const {
 	if (rank < other.rank) {
-		return true;
+		return -1;
 	} else if (rank > other.rank) {
-		return false;
+		return 1;
 	} else {
-		Cards::const_iterator a;
-		Cards::const_iterator b;
+		Cards::const_iterator a, b;
 		for (a = cards.begin(), b = other.cards.begin();
 			a != cards.end(), b != other.cards.end();
 			a++, b++) {
 			Card cardA = *a;
 			Card cardB = *b;
 			if (cardA < cardB) {
-				return true;
+				return -1;
 			} else if (cardA > cardB) {
-				return false;
+				return 1;
 			}
 		}
 		if (b != other.cards.end()) {
-			return true;
+			return -1;
+		} else if (a != cards.end()) {
+			return 1;
 		} else {
-			return false;
+			return 0;
 		}
 	}
+}
+
+bool Hand::operator< (Hand const & other) const {
+	return cmp(other) < 0;
+}
+
+bool Hand::operator> (Hand const & other) const {
+	return cmp(other) > 0;
+}
+
+bool Hand::operator== (Hand const & other) const {
+	return cmp(other) == 0;
 }
 
 bool Hand::straightFlush () const {
@@ -146,10 +170,13 @@ map<Hand::Rank,string> Hand::createMap () {
 	valueMap[Hand::TwoPair] = "Two pairs";
 	valueMap[Hand::OnePair] = "One pair";
 	valueMap[Hand::NoHand] = "No hand";
+	return valueMap;
 }
 
-std::ostream & operator<< (std::ostream & out, Hand const & hand) {
-	std::list<Card> const & cards = hand.cards;
+ostream & operator<< (std::ostream & out, Hand const & hand) {
+	string rankName = Hand::rankToString.find(hand.rank)->second;
+	out << rankName << " ";
+	Cards const & cards = hand.cards;
 	out << cards;
 	return out;
 }
