@@ -1,6 +1,6 @@
 #include "poker.h"
 
-const std::string Card::VALUE("23456789TJQKA");
+const string Card::VALUE("23456789TJQKA");
 
 Card::Card ():
 	num(0),
@@ -44,12 +44,12 @@ int Card::val () const {
 	return VALUE.find(num);
 }
 
-std::ostream & operator<< (std::ostream & out, Card const & card) {
+ostream & operator<< (ostream & out, Card const & card) {
 	out << card.num << card.suit;
 	return out;
 }
 
-std::ostream & operator<< (std::ostream & out, Cards const & cards) {
+ostream & operator<< (ostream & out, Cards const & cards) {
 	Cards::const_iterator it = cards.begin();
 	while (it != cards.end()) {
 		Card card = *it;
@@ -64,14 +64,15 @@ std::ostream & operator<< (std::ostream & out, Cards const & cards) {
 	return out;
 }
 
-const map<Hand::Rank,string> Hand::rankToString = Hand::createMap();
+const vector<string> Hand::rankToString = Hand::createRankNameVector();
 
 Hand::Hand (Cards cards_):
 	cards(cards_),
 	deciders(),
 	suitsToCards(),
 	numsToCards(),
-	straight(true) {
+	straight(true),
+	rank(NoHand) {
 	cards.sort();
 
 	Cards::iterator it;
@@ -159,22 +160,22 @@ bool Hand::flush () const {
 	return false;
 }
 
-map<Hand::Rank,string> Hand::createMap () {
-	map<Hand::Rank,string> valueMap;
-	valueMap[Hand::StraightFlush] = "Straight flush";
-	valueMap[Hand::FourOfAKind] = "Four of a kind";
-	valueMap[Hand::FullHouse] = "Full house";
-	valueMap[Hand::Flush] = "Flush";
-	valueMap[Hand::Straight] = "Straight";
-	valueMap[Hand::ThreeOfAKind] = "Three of a kind";
-	valueMap[Hand::TwoPair] = "Two pairs";
-	valueMap[Hand::OnePair] = "One pair";
-	valueMap[Hand::NoHand] = "No hand";
-	return valueMap;
+vector<string> Hand::createRankNameVector () {
+	vector<string> rankNameVector;
+	rankNameVector.push_back("No hand");
+	rankNameVector.push_back("One pair");
+	rankNameVector.push_back("Two pairs");
+	rankNameVector.push_back("Three of a kind");
+	rankNameVector.push_back("Straight");
+	rankNameVector.push_back("Flush");
+	rankNameVector.push_back("Full house");
+	rankNameVector.push_back("Four of a kind");
+	rankNameVector.push_back("Straight flush");
+	return rankNameVector;
 }
 
-ostream & operator<< (std::ostream & out, Hand const & hand) {
-	string rankName = Hand::rankToString.find(hand.rank)->second;
+ostream & operator<< (ostream & out, Hand const & hand) {
+	string rankName = Hand::rankToString[hand.rank];
 	out << rankName << " ";
 	Cards const & cards = hand.cards;
 	out << cards;

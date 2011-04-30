@@ -2,12 +2,14 @@
 #include <string>
 #include <list>
 #include <map>
+#include <vector>
 
 using std::ostream;
 using std::list;
 using std::map;
 using std::pair;
 using std::string;
+using std::vector;
 
 class Card {
 public:
@@ -33,6 +35,7 @@ ostream & operator<< (ostream & out, Cards const & cards);
 class Hand {
 public:
 	enum Rank {NoHand, OnePair, TwoPair, ThreeOfAKind, Straight, Flush, FullHouse, FourOfAKind, StraightFlush};
+	static const vector<string> rankToString;
 
 	Hand (Cards cards_);
 	int cmp (Hand const & other) const;
@@ -46,11 +49,10 @@ private:
 	map<char,Cards> numsToCards;
 	bool straight;
 	Rank rank;
-	static const map<Rank,string> rankToString;
 
 	bool straightFlush () const;
 	bool flush () const;
-	static map<Rank,string> createMap ();
+	static vector<string> createRankNameVector ();
 
 	friend ostream & operator<< (ostream & out, Hand const & hand);
 };
