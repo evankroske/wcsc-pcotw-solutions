@@ -50,6 +50,8 @@ private:
 	bool straight;
 	Rank rank;
 
+	int numNOfAKind (int n) const;
+	bool fourOfAKind () const;
 	bool straightFlush () const;
 	bool flush () const;
 	static vector<string> createRankNameVector ();

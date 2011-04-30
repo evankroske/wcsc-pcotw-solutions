@@ -95,6 +95,16 @@ Hand::Hand (Cards cards_):
 	if (straightFlush()) {
 		rank = StraightFlush;
 		deciders.push_back(cards.back());
+	} else if (fourOfAKind()) {
+		rank = FourOfAKind;
+		map<char,Cards>::const_iterator it;
+		for (it = numsToCards.begin(); it != numsToCards.end(); it++) {
+			if (it->second.size() == 4) {
+				deciders.push_back(it->second.back());
+			} else if (it->second.size() == 1) {
+				deciders.push_back(it->second.back());
+			}
+		}
 	} else if (flush()) {
 		rank = Flush;
 		deciders = cards;
@@ -147,6 +157,21 @@ bool Hand::operator== (Hand const & other) const {
 
 bool Hand::straightFlush () const {
 	return straight && flush();
+}
+
+int Hand::numNOfAKind (int n) const {
+	int count = 0;
+	map<char,Cards>::const_iterator it;
+	for (it = numsToCards.begin(); it != numsToCards.end(); it++) {
+		if (it->second.size() == n) {
+			count++;
+		}
+	}
+	return count;
+}
+
+bool Hand::fourOfAKind () const {
+	return numNOfAKind(4) > 0;
 }
 
 bool Hand::flush () const {
