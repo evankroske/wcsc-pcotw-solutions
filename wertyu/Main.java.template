@@ -1,0 +1,25 @@
+import java.io.*;
+
+public class Decode extends Object {
+	$CHARACTER_MAP$
+	public static void run () throws IOException {
+		String l = null;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		while ((l = in.readLine()) != null) {
+			for (byte b : l.getBytes()) {
+				if (charMap[b] != (char) 0) {
+					System.out.print(charMap[b]);
+				} else {
+					System.out.print((char) b);
+				}
+			}
+			System.out.println();
+		}
+	}
+
+	public static void main(String[] args) {
+		try {
+			run();
+		} catch (IOException e) {};
+	}
+}
