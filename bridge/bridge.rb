@@ -1,25 +1,54 @@
-def total_crossing_time_fancy(crossing_times)
-	crossing_times.inject(:+)
-end
-
-def total_crossing_time_plain(crossing_times)
-	total_crossing_time = 0
-	crossing_method = ""
-	queue = crossing_times.sort
-	first =  queue.slice!(0)
-	while true
-		last = queue.pop
-		if not queue.empty?
-			crossing_method += "#{first} #{last}\n#{first}\n"
-			total_crossing_time += first + last
+# invariant: crossing_times is sorted in ascending order
+def cross(crossing_times)
+	if (l = crossing_times.length) >= 4
+		a, b = crossing_times.slice(0, 2)
+		c, d = crossing_times.slice(-2, 2)
+		if 2 * b <= a + c
+			steps = [
+				"#{a} #{b}",
+				"#{a}", 
+				"#{c} #{d}", 
+				"#{b}"
+			]
+			time = 2 * b + a + d
+			other_time, other_steps = cross(crossing_times.slice(0, l - 2))
+			return time + other_time, steps + other_steps
 		else
-			crossing_method += "#{first} #{last}\n"
-			total_crossing_time += last
-			break
+			time = a + d
+			steps = [
+				"#{a} #{d}", 
+				"#{a}"
+			]
+			other_time, other_steps = cross(crossing_times.slice(0, l - 1))
+			return time + other_time, steps + other_steps
 		end
+	elsif l == 3
+		a, b, c = crossing_times
+		time = a + b + c
+		steps = [
+			"#{a} #{c}",
+			"#{a}",
+			"#{a} #{b}"
+		]
+		return time, steps
+	elsif l == 2
+		a, b = crossing_times
+		time = b
+		steps = [
+			"#{a} #{b}"
+		]
+		return time, steps
+	elsif l == 1
+		a = crossing_times[0]
+		time = a
+		steps = [
+			"#{a}"
+		]
+		return time, steps
+	else
+		puts "Big problem"
+		exit 1
 	end
-	puts total_crossing_time
-	puts crossing_method.chomp
 end
 
 def read_crossing_times()
@@ -34,8 +63,8 @@ end
 gets
 gets
 while not (crossing_times = read_crossing_times).empty?
-	puts "Plain:"
-	total_crossing_time_plain crossing_times
-	puts "Fancy:"
-	p total_crossing_time_fancy crossing_times
+	total_time, steps = cross(crossing_times.sort)
+	puts total_time
+	puts steps.join("\n")
+	puts
 end
