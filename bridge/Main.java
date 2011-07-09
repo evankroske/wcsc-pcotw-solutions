@@ -1,24 +1,39 @@
 import java.io.*;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Collections;
 
 class Main {
-	private static Console c = System.console();
-	private static PrintWriter o = c.writer();
+	private PrintStream o;
+	private BufferedReader i;
 
-	private static boolean handleCase () {
+	private boolean handleCase () throws IOException {
+		LinkedList<Integer> crossingTimes = new LinkedList<Integer>();
 		String l;
-		for (l = c.readLine(); l != null && !l.equals("\n"); l = c.readLine()) {
-			o.println(l);
+		i.readLine();
+		for (l = i.readLine(); l != null && !l.isEmpty(); l = i.readLine()) {
+			crossingTimes.add(new Integer(l.trim()));
 		}
-		if (l.equals("\n")) {
+		Collections.sort(crossingTimes);
+		System.out.println(crossingTimes);
+		if (l != null) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public static void main (String[] args) {
-		c.readLine();
-		c.readLine();
+	public Main() throws IOException {
+		i = new BufferedReader(new InputStreamReader(System.in));
+		o = System.out;
+
+		i.readLine();
+		i.readLine();
 		while (handleCase());
+	}
+
+	public static void main (String[] args) {
+		try { new Main(); } catch (IOException e) {;};
 	}
 }
