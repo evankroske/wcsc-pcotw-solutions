@@ -90,9 +90,9 @@ class Main {
 		for (String s : steps) {
 			o.println(s);
 		}
-		o.println();
 
 		if (l != null) {
+			o.println();
 			return true;
 		} else {
 			return false;
