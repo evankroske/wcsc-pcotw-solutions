@@ -39,9 +39,34 @@ class Main {
 				int remainingTime = cross(times, steps);
 				return time + remainingTime;
 			}
+		} else if (l == 3) {
+			int a, b, c;
+			a = times.pollFirst();
+			b = times.pollFirst();
+			c = times.pollFirst();
+
+			steps.add(String.format("%d %d", a, c));
+			steps.add(String.format("%d", a));
+			steps.add(String.format("%d %d", a, b));
+			int time = a + b + c;
+			return time;
+		} else if (l == 2) {
+			int a, b;
+			a = times.pollFirst();
+			b = times.pollFirst();
+
+			steps.add(String.format("%d %d", a, b));
+			int time = b;
+			return time;
+		} else if (l == 1) {
+			int a = times.pollFirst();
+
+			steps.add(String.format("%d", a));
+			int time = a;
+			return time;
 		} else {
-			o.println("Almost done");
-			return 6;
+			System.err.println("Zero-length queue passed to cross");
+			return -1;
 		}
 	}
 
@@ -52,14 +77,21 @@ class Main {
 		for (l = i.readLine(); l != null && !l.isEmpty(); l = i.readLine()) {
 			crossingTimes.add(new Integer(l.trim()));
 		}
+
 		Collections.sort(crossingTimes);
 		List<String> steps = new LinkedList<String>();
 		int totalTime = cross(crossingTimes, steps);
+		if (totalTime < 0) {
+			System.err.println("Input error");
+			return false;
+		}
+
 		o.println(totalTime);
 		for (String s : steps) {
 			o.println(s);
 		}
 		o.println();
+
 		if (l != null) {
 			return true;
 		} else {
