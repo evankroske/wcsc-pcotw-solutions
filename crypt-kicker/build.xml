@@ -1,0 +1,11 @@
+<project name="crypt-kicker" basedir="." default="build">
+	<target name="build">
+		<javac srcdir="." includeantruntime="false" />
+	</target>
+	<target name="test" depends="build">
+		<exec executable="bash">
+			<arg value="-c" />
+			<arg value="java Main &lt; input2" />
+		</exec>
+	</target>
+</project>
