@@ -2,9 +2,11 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	public PrintStream out;
-	public BufferedReader in;
 	public static final int MAX_WORD_LENGTH = 16;
+
+	private PrintStream out;
+	private BufferedReader in;
+	private Map<Integer,Set<String>> dict;
 
 	public static void main (String[] args) throws Exception {
 		new Main();
@@ -13,38 +15,44 @@ public class Main {
 	public Main () throws Exception {
 		out = System.out;
 		in = new BufferedReader(new InputStreamReader(System.in));
-		out.println("I/O initialized");
+		dict = new HashMap<Integer,Set<String>>();
 
 		String firstLine = in.readLine();
 		int dictLength = new Scanner(firstLine).nextInt();
 
-		Map<Integer,Set<String>> dict = new HashMap<Integer,Set<String>>();
 		for (int i = 0; i < dictLength; i++) {
 			String word = in.readLine();
-			out.printf("Word \"%s\" read\n", word);
 			if (dict.get(word.length()) == null) {
 				dict.put(word.length(), new HashSet<String>());
 			}
 			dict.get(word.length()).add(word);
 		}
-		out.println(dict.get(4).size());
 
 		String l = in.readLine();
 		while (l != null) {
-			List<String> encodedWords = Arrays.asList(l.split(" "));
+			List<String> encodedWords = new ArrayList(new HashSet<String>(Arrays.asList(l.split(" "))));
+
 			Iterator<String> it = encodedWords.iterator();
-			findTranslator(encodedWords, 2);
 			while (it.hasNext()) {
 				out.println(it.next());
 			}
 			out.println();
+
+			findTranslator(encodedWords, 2);
 			l = in.readLine();
 		}
 	}
 
 	private class NumBranchComparator implements Comparator<String> {
+		private int countBranches (String a) {
+			Set<String> branches = dict.get(a.length());
+			return (branches != null) ? branches.size() : 0;
+		}
+
 		public int compare (String a, String b) {
-			return 0;
+			Integer numABranches = countBranches(a);
+			Integer numBBranches = countBranches(b);
+			return numABranches.compareTo(numBBranches);
 		}
 	}
 
