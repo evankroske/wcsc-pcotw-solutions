@@ -31,6 +31,7 @@ public class Main {
 		String l = in.readLine();
 		while (l != null) {
 			List<String> encodedWords = new ArrayList(new HashSet<String>(Arrays.asList(l.split(" "))));
+			Collections.sort(encodedWords, new NumBranchComparator());
 
 			Iterator<String> it = encodedWords.iterator();
 			while (it.hasNext()) {
