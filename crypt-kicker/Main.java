@@ -32,14 +32,20 @@ public class Main {
 		while (l != null) {
 			List<String> encodedWords = new ArrayList(new HashSet<String>(Arrays.asList(l.split(" "))));
 			Collections.sort(encodedWords, new NumBranchComparator());
-
+			/*
 			Iterator<String> it = encodedWords.iterator();
 			while (it.hasNext()) {
 				out.println(it.next());
 			}
 			out.println();
-
-			findTranslator(encodedWords, 2);
+			*/
+			ImmutableTranslator translator = 
+				findTranslator(encodedWords, 2, new ImmutableTranslator());
+			if (translator != null) {
+				out.println(translator.decode(l));
+			} else {
+				out.println("********************");
+			}
 			l = in.readLine();
 		}
 	}
@@ -57,12 +63,81 @@ public class Main {
 		}
 	}
 
-	private class ImmutableTranslator {}
+	private class ImmutableTranslator {
+		char[] decode;
+		char[] encode;
 
-	private ImmutableTranslator findTranslator (List<String> encodedWords, int index) {
-		ListIterator<String> it = encodedWords.listIterator(index);
-		if (it.hasNext()) {
-			System.out.printf("found %s\n", it.next());
+		//static
+		private char[] createEmptyCharMap () {
+			char[] charMap = new char[128];
+			Arrays.fill(charMap, ' ');
+			return charMap;
+		}
+
+		public ImmutableTranslator () {
+			decode = createEmptyCharMap();
+			encode = createEmptyCharMap();
+		}
+
+		public ImmutableTranslator (char[] decode, char[] encode) {
+			this.decode = decode;
+			this.encode = encode;
+		}
+
+		//invariant: from.length() == to.length(), from and to contain no spaces
+		public ImmutableTranslator addPair (String from, String to) {
+			char[] tmpDecode = Arrays.copyOf(decode, decode.length);
+			char[] tmpEncode = Arrays.copyOf(encode, encode.length);
+			
+			for (int i  = 0; i < from.length(); i++) {
+				char fromChar = from.charAt(i);
+				byte fromByte = (byte) fromChar;
+				char toChar = to.charAt(i);
+				byte toByte = (byte) toChar;
+				if (tmpDecode[fromByte] == ' ') {
+					tmpDecode[fromByte] = toChar;
+				} else if (tmpDecode[fromByte] == toChar) {
+					// do nothing
+				} else {
+					return null;
+				}
+				if (tmpEncode[toByte] == ' ') {
+					tmpEncode[toByte] = fromChar;
+				} else if (tmpEncode[toByte] == fromChar) {
+					// do nothing
+				} else {
+					return null;
+				}
+			}
+			return new ImmutableTranslator(tmpDecode, tmpEncode);
+		}
+
+		public String decode (String from) {
+			String to = new String();
+			for (byte b : from.getBytes()) {
+				to += decode[b];
+			}
+			return to;
+		}
+	}
+
+	private ImmutableTranslator findTranslator (List<String> encodedWords, 
+		int index, ImmutableTranslator translator) {
+		if (index == encodedWords.size()) {
+			return translator;
+		}
+		String encodedWord = encodedWords.get(index);
+		for (String dictWord : dict.get(encodedWord.length())) {
+			ImmutableTranslator newTranslator = translator.addPair(encodedWord, 
+				dictWord);
+			if (newTranslator == null) {
+				continue;
+			}
+			ImmutableTranslator result = findTranslator(encodedWords, 
+				index + 1, newTranslator);
+			if (result != null) {
+				return result;
+			}
 		}
 		return null;
 	}
