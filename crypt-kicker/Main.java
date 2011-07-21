@@ -32,20 +32,13 @@ public class Main {
 		while (l != null) {
 			List<String> encodedWords = new ArrayList(new HashSet<String>(Arrays.asList(l.split(" "))));
 			Collections.sort(encodedWords, new NumBranchComparator());
-			/*
-			Iterator<String> it = encodedWords.iterator();
-			while (it.hasNext()) {
-				out.println(it.next());
-			}
-			out.println();
-			*/
+
 			ImmutableTranslator translator = 
-				findTranslator(encodedWords, 2, new ImmutableTranslator());
-			if (translator != null) {
-				out.println(translator.decode(l));
-			} else {
-				out.println("********************");
+				findTranslator(encodedWords, 0, new ImmutableTranslator());
+			if (translator == null) {
+				translator = new ImmutableTranslator();
 			}
+			out.println(translator.decode(l));
 			l = in.readLine();
 		}
 	}
@@ -64,13 +57,15 @@ public class Main {
 	}
 
 	private class ImmutableTranslator {
-		char[] decode;
-		char[] encode;
+		private char[] decode;
+		private char[] encode;
+		private static final char blank = '*';
 
 		//static
 		private char[] createEmptyCharMap () {
 			char[] charMap = new char[128];
-			Arrays.fill(charMap, ' ');
+			Arrays.fill(charMap, blank);
+			charMap[32] = ' ';
 			return charMap;
 		}
 
@@ -94,14 +89,14 @@ public class Main {
 				byte fromByte = (byte) fromChar;
 				char toChar = to.charAt(i);
 				byte toByte = (byte) toChar;
-				if (tmpDecode[fromByte] == ' ') {
+				if (tmpDecode[fromByte] == blank) {
 					tmpDecode[fromByte] = toChar;
 				} else if (tmpDecode[fromByte] == toChar) {
 					// do nothing
 				} else {
 					return null;
 				}
-				if (tmpEncode[toByte] == ' ') {
+				if (tmpEncode[toByte] == blank) {
 					tmpEncode[toByte] = fromChar;
 				} else if (tmpEncode[toByte] == fromChar) {
 					// do nothing
