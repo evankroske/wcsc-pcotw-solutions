@@ -18,17 +18,7 @@ class Main {
 	}
 
 	private void play (int goal) {
-		List<Integer> results = new LinkedList();
-		constructResults(results, 0, goal, 1);
-		int numOdds = 0, numEvens = 0;
-		for (int i : results) {
-			if (i % 2 == 0) {
-				numEvens++;
-			} else {
-				numOdds++;
-			}
-		}
-		out.printf("evens: %s, odds: %s\n", numEvens, numOdds);
+		stan(goal, 1);
 	}
 
 	private void constructResults (List<Integer> results, int numSteps, int goal, int p) {
@@ -44,6 +34,7 @@ class Main {
 	private void ollie (int goal, int p) {
 		if (p >= goal) {
 			out.println("Stan wins.");
+			return;
 		}
 		List<Integer> resultsIfNine = new LinkedList<Integer>();
 		constructResults(resultsIfNine, 0, goal, p*9);
@@ -63,6 +54,7 @@ class Main {
 	private void stan (int goal, int p) {
 		if (p >= goal) {
 			out.println("Ollie wins.");
+			return;
 		}
 		List<Integer> resultsIfNine = new LinkedList<Integer>();
 		constructResults(resultsIfNine, 0, goal, p*9);
