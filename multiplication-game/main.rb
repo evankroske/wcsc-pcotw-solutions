@@ -6,7 +6,7 @@ end
 
 def play_round(goal, p, stan)
 	if p >= goal
-		return !stan, stan ? 1 : 0
+		return !stan, !stan ? 1 : 0
 	end
 	stan_wins = {}
 	stan_win_percent = {}
@@ -16,8 +16,8 @@ def play_round(goal, p, stan)
 		stan_wins = if stan_win_percent_if_2 > stan_win_percent_if_9 then 
 			stan_wins_if_2 else stan_wins_if_9 end
 	else
-		stan_wins = if stan_win_percent_if_2 > stan_win_percent_if_9 then 
-			stan_wins_if_9 else stan_wins_if_2 end
+		stan_wins = if stan_win_percent_if_2 < stan_win_percent_if_9 then 
+			stan_wins_if_2 else stan_wins_if_9 end
 	end
 	stan_win_percent = (stan_win_percent_if_2 + stan_win_percent_if_9) / 2
 	return stan_wins, stan_win_percent
