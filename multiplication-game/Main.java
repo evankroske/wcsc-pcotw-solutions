@@ -15,38 +15,77 @@ class Main {
 		}
 	}
 
+	private class Turn implements Comparable<Turn> {
+		public boolean stanWins;
+		public double stanWinPercent;
+		public long p;
+		public Turn (boolean stanWins, double stanWinPercent, long p) {
+			this.stanWins = stanWins;
+			this.stanWinPercent = stanWinPercent;
+			this.p = p;
+		}
+
+		public int compareTo(Turn other) throws NullPointerException {
+			if (other == null) {
+				throw new NullPointerException();
+			}
+			if (p < other.p) {
+				return -1;
+			} else if (p > other.p) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
+		public String toString () {
+			return String.format("Turn(stanWins=%b, stanWinPercent=%f, p=%d)", 
+				stanWins, stanWinPercent, p);
+		}
+	}
+			
+
+
 	PrintStream out;
 	Scanner in;
 	public Main () {
 		out = System.out;
 		in = new Scanner(System.in);
 
-		while (in.hasNextInt()) {
-			play(in.nextInt());
+		while (in.hasNextLong()) {
+			play(in.nextLong());
 		}
 	}
 
-	private void play (int goal) {
-		Results results = playRound(goal, 1, true);
-		String winner = results.stanWins ? "Stan" : "Ollie";
-		out.printf("%s wins.\n", winner);
-	}
-	
-	private Results playRound (int goal, int p, boolean stan) {
-		if (p >= goal) {
-			return new Results(!stan, !stan ? 1 : 0);
+	private void play (long goal) {
+		List<Long> winningTurns = new LinkedList<Long>();
+		NavigableMap<Long, Turn> turns = new TreeMap<Long, Turn>();
+		long p = 1, pSteps = 0;
+		while (true) {
+			long q = p;
+			long qSteps = pSteps;
+			while (true) {
+				q *= 2;
+				qSteps++;
+				if (q >= goal) {
+					boolean stanWins = qSteps % 2 != 0;
+					double stanWinPercent = stanWins ? 1 : 0;
+					turns.put(q, new Turn(stanWins, stanWinPercent, q));
+					break;
+				}
+			}
+			p *= 9;
+			pSteps++;
+			if (p >= goal) {
+				boolean stanWins = pSteps % 2 != 0;
+				double stanWinPercent = stanWins ? 1 : 0;
+				turns.put(p, new Turn(stanWins, stanWinPercent, p));
+				break;
+			}
 		}
-		Results resultsIf2 = playRound(goal, p*2, !stan);
-		Results resultsIf9 = playRound(goal, p*9, !stan);
-		boolean stanWins;
-		if (stan) {
-			stanWins = resultsIf9.stanWinPercent >= resultsIf2.stanWinPercent ? 
-				resultsIf9.stanWins : resultsIf2.stanWins;
-		} else {
-			stanWins = resultsIf2.stanWinPercent >= resultsIf9.stanWinPercent ? 
-				resultsIf9.stanWins : resultsIf2.stanWins;
+		out.printf("Goal: %d\n", goal);
+		for (Turn turn : turns.values()) {
+			out.println(turn);
 		}
-		double stanWinPercent = (resultsIf2.stanWinPercent + resultsIf9.stanWinPercent) / 2;
-		return new Results(stanWins, stanWinPercent);
 	}
 }
