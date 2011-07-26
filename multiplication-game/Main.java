@@ -16,10 +16,12 @@ class Main {
 	}
 
 	private class Turn implements Comparable<Turn> {
+		public boolean stan;
 		public boolean stanWins;
 		public double stanWinPercent;
 		public long p;
-		public Turn (boolean stanWins, double stanWinPercent, long p) {
+		public Turn (boolean stan, boolean stanWins, double stanWinPercent, long p) {
+			this.stan = stan;
 			this.stanWins = stanWins;
 			this.stanWinPercent = stanWinPercent;
 			this.p = p;
@@ -39,8 +41,8 @@ class Main {
 		}
 
 		public String toString () {
-			return String.format("Turn(stanWins=%b, stanWinPercent=%f, p=%d)", 
-				stanWins, stanWinPercent, p);
+			return String.format("Turn(stan=%b, stanWins=%b, " + 		
+				"stanWinPercent=%f, p=%d)", stan, stanWins, stanWinPercent, p);
 		}
 	}
 			
@@ -58,7 +60,48 @@ class Main {
 	}
 
 	private void play (long goal) {
-		List<Long> winningTurns = new LinkedList<Long>();
+		NavigableMap<Long, Turn> turns = findWinningTurns(goal);
+
+		while (true) {
+			Map.Entry<Long, Turn> entry = turns.pollLastEntry();
+			Turn turn = entry.getValue();
+			if (turn.p == 1) {
+				String winner = turn.stanWins ? "Stan" : "Ollie";
+				out.printf("%s wins.\n", winner);
+				break;
+			}
+			for (int n : Arrays.asList(2, 9)) {
+				if (turn.p % n != 0) {
+					continue;
+				}
+				long p = turn.p / n;
+				boolean stan = !turn.stan;
+				double stanWinPercent;
+				boolean stanWins;
+
+				Turn other = turns.remove(p);
+				if (other != null) {
+					stanWinPercent = (turn.stanWinPercent + other.
+						stanWinPercent) / 2;
+					if (stan) {
+						stanWins = turn.stanWinPercent > other.stanWinPercent
+							? turn.stanWins 
+							: other.stanWins;
+					} else {
+						stanWins = turn.stanWinPercent < other.stanWinPercent
+							? turn.stanWins 
+							: other.stanWins;
+					}
+				} else {
+					stanWinPercent = turn.stanWinPercent;
+					stanWins = turn.stanWins;
+				}
+				turns.put(p, new Turn(stan, stanWins, stanWinPercent, p));
+			}
+		}
+	}
+
+	private NavigableMap<Long, Turn> findWinningTurns(long goal) {
 		NavigableMap<Long, Turn> turns = new TreeMap<Long, Turn>();
 		long p = 1, pSteps = 0;
 		while (true) {
@@ -68,24 +111,23 @@ class Main {
 				q *= 2;
 				qSteps++;
 				if (q >= goal) {
-					boolean stanWins = qSteps % 2 != 0;
+					boolean stan = qSteps % 2 != 0;
+					boolean stanWins = stan;
 					double stanWinPercent = stanWins ? 1 : 0;
-					turns.put(q, new Turn(stanWins, stanWinPercent, q));
+					turns.put(q, new Turn(stan, stanWins, stanWinPercent, q));
 					break;
 				}
 			}
 			p *= 9;
 			pSteps++;
 			if (p >= goal) {
-				boolean stanWins = pSteps % 2 != 0;
+				boolean stan = pSteps % 2 != 0;
+				boolean stanWins = stan;
 				double stanWinPercent = stanWins ? 1 : 0;
-				turns.put(p, new Turn(stanWins, stanWinPercent, p));
+				turns.put(p, new Turn(stan, stanWins, stanWinPercent, p));
 				break;
 			}
 		}
-		out.printf("Goal: %d\n", goal);
-		for (Turn turn : turns.values()) {
-			out.println(turn);
-		}
+		return turns;
 	}
 }
