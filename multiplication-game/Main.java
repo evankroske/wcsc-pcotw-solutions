@@ -16,15 +16,31 @@ class Main {
 	}
 
 	private class Turn implements Comparable<Turn> {
-		public boolean stan;
-		public boolean stanWins;
-		public double stanWinPercent;
-		public long p;
+		private boolean stan;
+		private boolean stanWins;
+		private double stanWinPercent;
+		private long p;
+		private Map<Integer, Turn> branches;
+
+		public Turn(long p) {
+			this.p = p;
+			this.branches = new HashMap<Integer, Turn>(2);
+		}
+
 		public Turn (boolean stan, boolean stanWins, double stanWinPercent, long p) {
 			this.stan = stan;
 			this.stanWins = stanWins;
 			this.stanWinPercent = stanWinPercent;
 			this.p = p;
+			this.branches = new HashMap<Integer, Turn>(2);
+		}
+
+		public boolean isOne () {
+			return p == 1;
+		}
+
+		public String winner () {
+			return stanWins ? "Stan" : "Ollie";
 		}
 
 		public int compareTo(Turn other) throws NullPointerException {
@@ -43,6 +59,29 @@ class Main {
 		public String toString () {
 			return String.format("Turn(stan=%b, stanWins=%b, " + 		
 				"stanWinPercent=%f, p=%d)", stan, stanWins, stanWinPercent, p);
+		}
+
+		private void init () {
+			Turn branch2 = branches.get(2);
+			Turn branch9 = branches.get(9);
+
+			stan = !branch2.stan;
+			stanWinPercent = (branch2.stanWinPercent + branch9.
+				stanWinPercent) / 2;
+			if (branch9.stanWinPercent > branch2.stanWinPercent) {
+				stanWins = stan ? branch9.stanWins : branch2.stanWins;
+			} else if (branch9.stanWinPercent < branch2.stanWinPercent) {
+				stanWins = stan ? branch2.stanWins : branch9.stanWins;
+			} else {
+				stanWins = branch9.stanWins;
+			}
+		}
+		
+		public void addBranch (int choice, Turn turn) {
+			branches.put(choice, turn);
+			if (branches.size() == 2) {
+				init();
+			}
 		}
 	}
 			
@@ -65,9 +104,8 @@ class Main {
 		while (true) {
 			Map.Entry<Long, Turn> entry = turns.pollLastEntry();
 			Turn turn = entry.getValue();
-			if (turn.p == 1) {
-				String winner = turn.stanWins ? "Stan" : "Ollie";
-				out.printf("%s wins.\n", winner);
+			if (turn.isOne()) {
+				out.printf("%s wins.\n", turn.winner());
 				break;
 			}
 			for (int n : Arrays.asList(2, 9)) {
@@ -75,28 +113,12 @@ class Main {
 					continue;
 				}
 				long p = turn.p / n;
-				boolean stan = !turn.stan;
-				double stanWinPercent;
-				boolean stanWins;
-
-				Turn other = turns.remove(p);
-				if (other != null) {
-					stanWinPercent = (turn.stanWinPercent + other.
-						stanWinPercent) / 2;
-					if (stan) {
-						stanWins = turn.stanWinPercent > other.stanWinPercent
-							? turn.stanWins 
-							: other.stanWins;
-					} else {
-						stanWins = turn.stanWinPercent < other.stanWinPercent
-							? turn.stanWins 
-							: other.stanWins;
-					}
-				} else {
-					stanWinPercent = turn.stanWinPercent;
-					stanWins = turn.stanWins;
+				Turn parent = turns.get(p);
+				if (parent == null) {
+					parent = new Turn(p);
+					turns.put(p, parent);
 				}
-				turns.put(p, new Turn(stan, stanWins, stanWinPercent, p));
+				parent.addBranch(n, turn);
 			}
 		}
 	}
