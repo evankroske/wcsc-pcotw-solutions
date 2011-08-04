@@ -130,7 +130,7 @@ class Main {
 			long q = p;
 			long qSteps = pSteps;
 			while (true) {
-				q *= 2;
+				q *= 9;
 				qSteps++;
 				if (q >= goal) {
 					boolean stan = qSteps % 2 != 0;
@@ -140,7 +140,7 @@ class Main {
 					break;
 				}
 			}
-			p *= 9;
+			p *= 2;
 			pSteps++;
 			if (p >= goal) {
 				boolean stan = pSteps % 2 != 0;
