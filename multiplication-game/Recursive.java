@@ -1,39 +1,39 @@
 import java.io.*;
 import java.util.*;
 
-class Main {
+class Recursive {
 	public static void main (String[] args) throws Exception {
-		new Main();
-	}
-
-	private class Results {
-		public boolean stanWins;
-		public double stanWinPercent;
-		public Results (boolean stanWins, double stanWinPercent) {
-			this.stanWins = stanWins;
-			this.stanWinPercent = stanWinPercent;
+		if (args.length > 0) {
+			new Recursive(true);
+		} else {
+			new Recursive(false);
 		}
 	}
 
 	PrintStream out;
 	Scanner in;
-	public Main () {
+	boolean list;
+
+	public Recursive (boolean list) {
 		out = System.out;
 		in = new Scanner(System.in);
-
-		while (in.hasNextInt()) {
-			play(in.nextInt());
-		}
+		this.list = list;
+		play(in.nextInt());
 	}
 
 	private void play (int goal) {
 		Results results = playRound(goal, 1, true);
-		String winner = results.stanWins ? "Stan" : "Ollie";
-		out.printf("%s wins.\n", winner);
+		if (!list) {
+			String winner = results.stanWins ? "Stan" : "Ollie";
+			out.printf("%s wins.\n", winner);
+		}
 	}
 	
 	private Results playRound (int goal, int p, boolean stan) {
 		if (p >= goal) {
+			if (list) {
+				out.println(p);
+			}
 			return new Results(!stan, !stan ? 1 : 0);
 		}
 		Results resultsIf2 = playRound(goal, p*2, !stan);
@@ -49,4 +49,14 @@ class Main {
 		double stanWinPercent = (resultsIf2.stanWinPercent + resultsIf9.stanWinPercent) / 2;
 		return new Results(stanWins, stanWinPercent);
 	}
+
+	private class Results {
+		public boolean stanWins;
+		public double stanWinPercent;
+		public Results (boolean stanWins, double stanWinPercent) {
+			this.stanWins = stanWins;
+			this.stanWinPercent = stanWinPercent;
+		}
+	}
+
 }

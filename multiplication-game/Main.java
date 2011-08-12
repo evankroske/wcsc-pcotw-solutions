@@ -3,18 +3,34 @@ import java.util.*;
 
 class Main {
 	public static void main (String[] args) throws Exception {
-		new Main();
+		Main main = new Main();
+		if (args.length > 0) {
+			main.listWinningTurns();
+		} else {
+			main.solve();
+		}
 	}
-
 
 	PrintStream out;
 	Scanner in;
+
 	public Main () {
 		out = System.out;
 		in = new Scanner(System.in);
+	}
 
+	private void solve () {
 		while (in.hasNextLong()) {
 			play(in.nextLong());
+		}
+	}
+
+	private void listWinningTurns () {
+		while (in.hasNextLong()) {
+			NavigableMap<Long, Turn> turns = findWinningTurns(in.nextLong());
+			for (Turn turn : turns.values()) {
+				out.println(turn.p);
+			}
 		}
 	}
 
@@ -53,8 +69,8 @@ class Main {
 				q *= 9;
 				qSteps++;
 				if (q >= goal) {
-					boolean stan = qSteps % 2 != 0;
-					boolean stanWins = stan;
+					boolean stan = qSteps % 2 == 0;
+					boolean stanWins = !stan;
 					double stanWinPercent = stanWins ? 1 : 0;
 					turns.put(q, new Turn(stan, stanWins, stanWinPercent, q));
 					break;
@@ -63,8 +79,8 @@ class Main {
 			p *= 2;
 			pSteps++;
 			if (p >= goal) {
-				boolean stan = pSteps % 2 != 0;
-				boolean stanWins = stan;
+				boolean stan = pSteps % 2 == 0;
+				boolean stanWins = !stan;
 				double stanWinPercent = stanWins ? 1 : 0;
 				turns.put(p, new Turn(stan, stanWins, stanWinPercent, p));
 				break;
@@ -116,7 +132,8 @@ class Main {
 
 		public String toString () {
 			return String.format("Turn(stan=%b, stanWins=%b, " + 		
-				"stanWinPercent=%f, p=%d)", stan, stanWins, stanWinPercent, p);
+				"stanWinPercent=%f, p=%d, branches.size=%d)", stan, stanWins,
+				stanWinPercent, p, branches.size());
 		}
 
 		private void init () {
