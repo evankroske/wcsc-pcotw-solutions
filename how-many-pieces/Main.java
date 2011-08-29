@@ -18,16 +18,24 @@ class Main {
 		}
 	}
 
-	long factorial (int degree) {
-		int result = 1;
-		while (degree > 1) {
-			result *= degree;
-			degree--;
+	long factorial (long degree) {
+		long factor = degree;
+		if (degree > 1) {
+			long result = 1;
+			while (factor > 1) {
+				result *= factor;
+				factor--;
+			}
+			if (result < 1) {
+				out.printf("degree: %d, result: %d%n", degree, result);
+			}
+			return result;
+		} else {
+			return 1;
 		}
-		return result;
 	}
 
-	long choose (int n, int k) {
+	long choose (long n, long k) {
 		if (n >= k) {
 			return factorial(n) / (factorial(k) * factorial(n - k));
 		} else {
