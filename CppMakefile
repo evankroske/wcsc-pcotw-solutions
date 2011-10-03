@@ -1,0 +1,6 @@
+main: main.o
+
+all: main
+
+test: main.o
+	./main < input
