@@ -1,6 +1,7 @@
 main: main.o
+	g++ $< -o $@
 
 all: main
 
-test: main.o
+test: main
 	./main < input
