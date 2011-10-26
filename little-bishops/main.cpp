@@ -45,20 +45,20 @@ void genCandidates (vector<int> & a, int n, int maxBishops, int k, vector<int> &
 {
 	int numBishops = countBishops(a);
 	int numSquares = countSquares(n, k);
+	bool * emptyRows = new bool[n];
+	fill(emptyRows, emptyRows + n, true);
 	if (numBishops < maxBishops) {
+		// Loop through diagnoals of the same parity as the current one.
+		for (int j = (numSquares - 1) % 2; j < k; j += 2) {
+			int bishopIndex = a.at(j);
+			if (bishopIndex != INT_MAX) {
+				emptyRows[bishopIndex] = false;
+			}
+		}
 		for (int i = 0; i < numSquares; i++) {
 			// Generate absolute index for bishop. May be negative.
-			int candidateIndex = i - numSquares / 2;
-			bool rowEmpty = true;
-			// Loop through diagnoals of the same parity as the current one.
-			for (int j = (numSquares - 1) % 2; j < k; j += 2) {
-				int bishopIndex = a.at(j);
-				if (bishopIndex == candidateIndex) {
-					rowEmpty = false;
-					break;
-				}
-			}
-			if (rowEmpty) {
+			int candidateIndex = i - numSquares / 2 + n / 2;
+			if (emptyRows[candidateIndex]) {
 				candidates.push_back(candidateIndex);
 			}
 		}
