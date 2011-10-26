@@ -16,48 +16,61 @@ int countBishops (vector<int> & a)
 	return numBishops;
 }
 
-bool isSolution (vector<int> a)
+int countDiagonals (int n)
 {
-	return countBishops(a) == 3;
+	return 2 * n - 1;
 }
 
-void processSolution (vector<int> a)
+bool isSolution (int n, int k)
+{
+	return countDiagonals(n) == k;
+}
+
+void processSolution (vector<int> & a)
 {
 	numSolutions++;
 }
 
 int countSquares (int n, int k)
 {
-	if (k <= n / 2 - 1 + n % 2) {
+	int numD = countDiagonals(n);
+	if (k <= numD / 2) {
 		return k + 1;
 	} else {
-		return n - k;
+		return numD - k;
 	}
 }
 
-void genCandidates (vector<int> a, int n, int maxBishops, int k, vector<int> & candidates)
+void genCandidates (vector<int> & a, int n, int maxBishops, int k, vector<int> & candidates)
 {
 	int numBishops = countBishops(a);
 	int numSquares = countSquares(n, k);
 	if (numBishops < maxBishops) {
 		for (int i = 0; i < numSquares; i++) {
+			// Generate absolute index for bishop. May be negative.
 			int candidateIndex = i - numSquares / 2;
+			bool rowEmpty = true;
+			// Loop through diagnoals of the same parity as the current one.
 			for (int j = (numSquares - 1) % 2; j < k; j += 2) {
 				int bishopIndex = a.at(j);
-				if (bishopIndex == INT_MAX) {
-					candidates.push_back(candidateIndex);
-				} else if (bishopIndex != candidateIndex) {
-					candidates.push_back(candidateIndex);
+				if (bishopIndex == candidateIndex) {
+					rowEmpty = false;
+					break;
 				}
+			}
+			if (rowEmpty) {
+				candidates.push_back(candidateIndex);
 			}
 		}
 	}
-	candidates.push_back(INT_MAX);
+	if (maxBishops - numBishops < countDiagonals(n) - k) {
+		candidates.push_back(INT_MAX);
+	}
 }
 
 void genSolutions (vector<int> & a, int n, int maxBishops, int k)
 {
-	if (isSolution(a)) {
+	if (isSolution(n, k)) {
 		processSolution(a);
 		return;
 	}
@@ -72,18 +85,28 @@ void genSolutions (vector<int> & a, int n, int maxBishops, int k)
 	}
 }
 
-int main () 
+int main (int argc, char ** argv) 
 {
-	while (true) {
-		int n, numBishops;
-		cin >> n >> numBishops;
-		if (n == 0) {
-			break;
+	if (argc == 1) {
+		while (true) {
+			int n, numBishops;
+			cin >> n;
+			cin >> numBishops;
+			if (n == 0) {
+				break;
+			}
+			vector<int> solutions;
+			genSolutions(solutions, n, numBishops, 0);
+			cout << numSolutions << "\n";
+			numSolutions = 0;
 		}
-		vector<int> solutions;
-		genSolutions(solutions, n, numBishops, 0);
-		cout << numSolutions << "\n";
-		numSolutions = 0;
+	} else {
+		int tmp[] = {10, -2, 3, 5, INT_MAX, 6, 7};
+		vector<int> bishops(tmp, tmp + sizeof(tmp) / sizeof(tmp[0]));
+		cout << countBishops(bishops) << "\n";
+		cout << countSquares(3, 2) << " should be 3\n";
+		cout << countSquares(3, 4) << " should be 1\n";
+		cout << countSquares(4, 4) << " should be 3\n";
 	}
 	return 0;
 }
