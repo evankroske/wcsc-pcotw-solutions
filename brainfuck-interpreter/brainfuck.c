@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef unsigned char Cell;
+
 typedef struct code_struct {
 	int length;
 	int next;
@@ -14,18 +16,13 @@ void expand (Code *code);
 #define MEM_SIZE 30000
 typedef struct mem_struct {
 	int dp;
-	char data[MEM_SIZE];
+	Cell data[MEM_SIZE];
 } Memory;
 
 Memory *init_mem();
-void inc_cell (Memory *mem);
-void dec_cell (Memory *mem);
-void inc_dp (Memory *mem);
-void dec_dp (Memory *mem);
-char get_cell (Memory *mem);
-void set_cell (Memory *mem, char c);
 
 int interpret (Code *code, int ip, Memory *mem);
+int skip (Code *code, int ip);
 
 void dump (Memory *mem, int n);
 
@@ -55,7 +52,6 @@ int main (int argc, char **argv)
 	code->next = 0;
 	Memory *mem = init_mem();
 	interpret(code, 0, mem);
-	dump(mem, 5);
 	return 0;
 }
 
@@ -128,25 +124,47 @@ int interpret (Code *code, int ip, Memory *mem)
 				break;
 			case '>':
 				mem->dp = (mem->dp + 1) % MEM_SIZE;
-				if (mem->dp >= MEM_SIZE)
-				{
-					puts("DP incremented past memory");
-					exit(1);
-				}
 				break;
 			case '<':
 				mem->dp = (mem->dp - 1 + MEM_SIZE) % MEM_SIZE;
-				if (mem->dp < 0)
-				{
-					puts("DP decremented past memory");
-				}
 				break;
 			case '[':
-				while (mem->data[mem->dp])
+				if (mem->data[mem->dp])
 				{
-					new_ip = interpret(code, ip + 1, mem);
+					do
+					{
+						new_ip = interpret(code, ip + 1, mem);
+					}
+					while (mem->data[mem->dp]);
+					ip = new_ip;
 				}
-				ip = new_ip;
+				else
+				{
+					ip = skip(code, ip + 1);
+				}
+				break;
+			case ']':
+				return ip;
+				break;
+			case ';':
+				dump(mem, 7);
+				break;
+			default:
+				break;
+		}
+		ip++;
+	}
+	return ip;
+}
+
+int skip (Code *code, int ip)
+{
+	while (code->data[ip])
+	{
+		switch (code->data[ip])
+		{
+			case '[':
+				ip = skip(code, ip + 1);
 				break;
 			case ']':
 				return ip;
@@ -158,7 +176,6 @@ int interpret (Code *code, int ip, Memory *mem)
 	}
 	return ip;
 }
-
 void dump (Memory *mem, int n)
 {
 	printf("DP: %d\n", mem->dp);
